@@ -11,8 +11,13 @@ st.set_page_config(
     layout='wide')
 
 #Carregar os Dados
-url = "https://raw.githubusercontent.com/vqrca/dashboard_salarios_dados/main/dados-imersao-final.csv"
-df = pd.read_csv(url, sep=',')
+@st.cache_data
+def carregar_dados():
+    url = "https://raw.githubusercontent.com/vqrca/dashboard_salarios_dados/main/dados-imersao-final.csv"
+    df = pd.read_csv(url, sep=',')
+    return df
+
+df = carregar_dados()
 
 #Barra Lateral de Filtros
 st.sidebar.header("🔎 Filtros")
@@ -61,7 +66,7 @@ if not df_filtrado.empty: #se o df nao estiver vazio
     salario_medio = df_filtrado['usd'].mean()
     salario_maximo = df_filtrado['usd'].max()
     total_registros = df_filtrado.shape[0] #qtd linhas diz qts registross tem
-    cargo_mais_frequente = df_filtrado['cargo'].mode()[0]
+    cargo_mais_frequente = df_filtrado['cargo'].mode()[0] #mode é a moda estatística, [0] pega o 1o item da lista
 else:
     salario_medio,salario_maximo,total_registros,cargo_mais_frequente = 0,0,0,0
 
@@ -103,11 +108,11 @@ with col_graf2:
             df_filtrado,
             x='usd',
             nbins=30,
-            title='Top 10 cargos por salario Médio',
+            title='Distribuição Salarial dos funcionários',
             labels = {'usd': 'Media Salarial anual (em USD)','count':''}
         )
         #title_x : mover o titulo x p direita, yaxis: 
-        grafico_cargos.update_layout(title_x=0.1)
+        grafico_hist.update_layout(title_x=0.1)
         st.plotly_chart(grafico_hist, use_container_width=True)
     else:
         st.warning('Nenhum dado para exibir no grafico de cargos')
